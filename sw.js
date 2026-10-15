@@ -1,4 +1,4 @@
-var CACHE = "vazao-v1";
+var CACHE = "vazao-v2";
 var ARQ = ["./", "./index.html", "./manifest.webmanifest",
            "./icon-180.png", "./icon-192.png", "./icon-512.png"];
 

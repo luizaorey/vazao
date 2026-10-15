@@ -74,6 +74,14 @@ tr.key td{background:rgba(255,189,54,.08)}tr.key td:first-child{color:var(--ambe
 .note.ok{border:1px solid #245c42;background:#0a1c15;color:#9fe6bd}
 .note.warn{border:1px solid #6b5a2e;background:#1c160a;color:#ffd98a}
 .note b{color:#fff}
+.taglist{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.taglist:empty::after{content:"nenhuma TAG salva ainda";color:#5c7488;font-size:11.5px}
+.chip{display:inline-flex;align-items:center;gap:7px;background:#081521;border:1px solid var(--line);
+  border-radius:999px;color:#cfe2ef;padding:7px 8px 7px 12px;font-size:12px;cursor:pointer}
+.chip:active{border-color:var(--blue)}
+.chip .x{display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#132434;color:#8aa0b0;font-size:13px}
+.badge{display:inline-block;background:#3a1512;border:1px solid #6b352e;color:#ff8f85;border-radius:999px;
+  padding:2px 9px;font-size:10.5px;font-weight:700;margin-left:8px;vertical-align:middle}
 .foot{color:#5c7488;font-size:11px;text-align:center;margin-top:18px;line-height:1.6}
 </style>
 </head>
@@ -109,11 +117,26 @@ tr.key td{background:rgba(255,189,54,.08)}tr.key td:first-child{color:var(--ambe
           </select>
         </div>
       </div>
+      <div class="row">
+        <div class="fld" style="max-width:200px"><label>Corte de baixa vazão (% da vazão)</label><input type="number" id="cutoff" value="0" min="0" max="20" step="0.5" inputmode="decimal"></div>
+      </div>
       <label>Onde é feita a extração de raiz?</label>
       <div class="seg" id="mode">
         <button data-m="painel" class="on"><b>Raiz no painel</b><small>transmissor manda ΔP linear</small></button>
         <button data-m="tx"><b>Raiz no transmissor</b><small>já manda vazão</small></button>
       </div>
+    </div>
+  </div>
+
+  <!-- TAGS -->
+  <div class="panel">
+    <div class="ph">TAGs salvas</div>
+    <div class="pb">
+      <div class="row" style="align-items:flex-end">
+        <div class="fld" style="margin-bottom:0"><label>Nome da TAG</label><input type="text" id="tagName" placeholder="ex.: FT-101" autocomplete="off"></div>
+        <button id="tagSave" style="background:var(--blue);border:0;color:#fff;font-weight:700;border-radius:9px;padding:11px 16px;cursor:pointer;margin-bottom:0">Salvar</button>
+      </div>
+      <div id="tagList" class="taglist"></div>
     </div>
   </div>
 
@@ -172,16 +195,18 @@ function br(n,d){ // formata com vírgula
 }
 function vazaoPct(dpPct){ return dpPct<=0?0:10*Math.sqrt(dpPct); } // 0..100
 function maLinear(dpPct){ return 4+16*(dpPct/100); }
-function maRaiz(dpPct){ return 4+16*(vazaoPct(dpPct)/100); }
 
 function calc(){
-  var dpMin=num("dpMin"),dpMax=num("dpMax"),qMin=num("qMin"),qMax=num("qMax");
+  var dpMin=num("dpMin"),dpMax=num("dpMax"),qMin=num("qMin"),qMax=num("qMax"),cutoff=num("cutoff");
   var dpU=$("dpUnit").value,qU=$("qUnit").value;
   $("lvDpU").textContent=dpU;$("lvQU").textContent=qU;$("thDpU").textContent=dpU;$("thQU").textContent=qU;
 
+  function eff(dpPct){var v=vazaoPct(dpPct);return (v>0&&v<cutoff)?0:v;}       // aplica corte de baixa vazão
+  function maRaizEff(dpPct){return 4+16*(eff(dpPct)/100);}                      // mA se transmissor extrai raiz
+
   // ----- live -----
   var p=parseFloat($("slider").value); // dp %
-  var vp=vazaoPct(p);
+  var vpRaw=vazaoPct(p), vp=eff(p), cut=(vpRaw>0&&vpRaw<cutoff);
   var dpVal=dpMin+(dpMax-dpMin)*p/100;
   var qVal=qMin+(qMax-qMin)*vp/100;
   $("lvDp").textContent=br(dpVal, dpVal>=100?0:1);
@@ -190,8 +215,8 @@ function calc(){
   $("lvQPct").textContent=br(vp,1);
   $("lvBar").style.width=vp+"%";
   $("maLin").textContent=br(maLinear(p),2);
-  $("maRaiz").textContent=br(maRaiz(p),2);
-  $("lvPan").textContent=br(vp,1)+"%";
+  $("maRaiz").textContent=br(maRaizEff(p),2);
+  $("lvPan").innerHTML=br(vp,1)+"%"+(cut?" <span class='badge'>CORTE</span>":"");
   $("cLin").className="cell"+(mode==="painel"?" on":"");
   $("cRaiz").className="cell"+(mode==="tx"?" on":"");
 
@@ -210,25 +235,52 @@ function calc(){
   // ----- tabela -----
   var html="";
   for(var i=0;i<PTS.length;i++){
-    var dp=PTS[i], v=vazaoPct(dp);
+    var dp=PTS[i], v=eff(dp);
     var dv=dpMin+(dpMax-dpMin)*dp/100;
     var qv=qMin+(qMax-qMin)*v/100;
     var key=(dp===25)?" class='key'":"";
     html+="<tr"+key+"><td>"+dp+"%</td><td class='dpc'>"+br(dv,dv>=100?0:1)+"</td>"+
       "<td>"+br(v,1)+"%</td><td class='vzc'>"+br(qv,qv>=100?0:1)+"</td>"+
-      "<td class='mono'>"+br(maLinear(dp),2)+"</td><td class='mono'>"+br(maRaiz(dp),2)+"</td></tr>";
+      "<td class='mono'>"+br(maLinear(dp),2)+"</td><td class='mono'>"+br(maRaizEff(dp),2)+"</td></tr>";
   }
   $("tbody").innerHTML=html;
 
   // check 25%
   var modoTxt=(mode==="painel")?"o painel faz a raiz (transmissor sai linear)":"o transmissor faz a raiz";
   $("check").innerHTML="<b>✅ Conferência dos 25%:</b> com "+modoTxt+", ao injetar <b>25% de ΔP</b> "+
-    "("+br(dpMin+(dpMax-dpMin)*0.25,0)+" "+$("dpUnit").value+") o transmissor deve indicar "+
-    "<b>"+(mode==="painel"?br(maLinear(25),2)+" mA":br(maRaiz(25),2)+" mA")+"</b> e o painel <b>50% da vazão</b>.";
+    "("+br(dpMin+(dpMax-dpMin)*0.25,0)+" "+dpU+") o transmissor deve indicar "+
+    "<b>"+(mode==="painel"?br(maLinear(25),2)+" mA":br(maRaizEff(25),2)+" mA")+"</b> e o painel <b>50% da vazão</b>.";
+}
+
+// ---- TAGs (salvas no aparelho) ----
+var TKEY="vazao_tags";
+function getTags(){try{return JSON.parse(localStorage.getItem(TKEY))||[]}catch(e){return[]}}
+function setTags(a){try{localStorage.setItem(TKEY,JSON.stringify(a))}catch(e){}}
+function renderTags(){
+  var a=getTags(),h="";
+  for(var i=0;i<a.length;i++){h+="<span class='chip' data-i='"+i+"'>"+a[i].name+"<span class='x' data-del='"+i+"'>×</span></span>";}
+  $("tagList").innerHTML=h;
+}
+function saveTag(){
+  var nm=$("tagName").value.trim();if(!nm)return;
+  var a=getTags();
+  var t={name:nm,dpMin:$("dpMin").value,dpMax:$("dpMax").value,dpUnit:$("dpUnit").value,
+    qMin:$("qMin").value,qMax:$("qMax").value,qUnit:$("qUnit").value,cutoff:$("cutoff").value,mode:mode};
+  var idx=-1;for(var i=0;i<a.length;i++){if(a[i].name.toLowerCase()===nm.toLowerCase())idx=i;}
+  if(idx>=0)a[idx]=t;else a.push(t);
+  setTags(a);renderTags();$("tagName").value="";
+}
+function loadTag(i){
+  var t=getTags()[i];if(!t)return;
+  $("dpMin").value=t.dpMin;$("dpMax").value=t.dpMax;$("dpUnit").value=t.dpUnit;
+  $("qMin").value=t.qMin;$("qMax").value=t.qMax;$("qUnit").value=t.qUnit;$("cutoff").value=t.cutoff||0;
+  mode=t.mode||"painel";
+  [].forEach.call($("mode").children,function(x){x.classList.toggle("on",x.getAttribute("data-m")===mode)});
+  calc();
 }
 
 // eventos
-["dpMin","dpMax","qMin","qMax","dpUnit","qUnit","slider"].forEach(function(id){
+["dpMin","dpMax","qMin","qMax","dpUnit","qUnit","cutoff","slider"].forEach(function(id){
   $(id).addEventListener("input",calc);
 });
 $("mode").addEventListener("click",function(e){
@@ -237,6 +289,14 @@ $("mode").addEventListener("click",function(e){
   [].forEach.call(this.children,function(x){x.classList.remove("on")});
   b.classList.add("on");calc();
 });
+$("tagSave").addEventListener("click",saveTag);
+$("tagName").addEventListener("keydown",function(e){if(e.key==="Enter")saveTag();});
+$("tagList").addEventListener("click",function(e){
+  var del=e.target.getAttribute("data-del");
+  if(del!=null){var a=getTags();a.splice(+del,1);setTags(a);renderTags();return;}
+  var chip=e.target.closest(".chip");if(chip)loadTag(+chip.getAttribute("data-i"));
+});
+renderTags();
 calc();
 
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").catch(function(){})})}
