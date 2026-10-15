@@ -9,66 +9,237 @@
 <meta name="apple-mobile-web-app-title" content="Vazão">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
-<title>Vazão · ferramenta de campo</title>
+<title>Vazão · Placa de Orifício</title>
 <style>
 :root{
-  --bg:#07111b; --bg2:#0b1724; --panel:#0e1b29; --panel2:#101f2f; --line:#23384b;
+  --bg:#07111b; --panel:#0e1b29; --panel2:#0b1724; --line:#23384b;
   --ink:#eaf4fa; --muted:#90a7b8; --blue:#27a8ff; --cyan:#62d5ff; --amber:#ffbd36;
-  --green:#72d348; --red:#ff685f; --shadow:0 18px 50px rgba(0,0,0,.28);
+  --green:#72d348; --red:#ff685f; --shadow:0 14px 40px rgba(0,0,0,.30);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%;color:var(--ink);
   background:radial-gradient(circle at 45% 0%,#11283c 0,#07111b 42%,#050b12 100%);
   font:15px/1.5 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.app{max-width:880px;margin:0 auto;padding:16px}
-.topbar{display:flex;gap:14px;align-items:center;border:1px solid #1e5a80;
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.app{max-width:760px;margin:0 auto;padding:14px 14px 40px}
+.topbar{display:flex;gap:13px;align-items:center;border:1px solid #1e5a80;
   background:linear-gradient(180deg,rgba(10,26,40,.98),rgba(5,15,24,.98));
-  border-radius:14px;padding:14px 18px;box-shadow:var(--shadow)}
-.logo{width:46px;height:46px;border-radius:12px;border:1px solid var(--line);
-  background:#0a1b2a;display:grid;place-items:center;font-size:24px}
-.brand h1{font-size:24px;line-height:1;margin:0}
-.brand p{margin:5px 0 0;color:var(--blue);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
-.card{margin-top:16px;background:linear-gradient(180deg,rgba(14,27,41,.96),rgba(9,20,31,.96));
-  border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);padding:18px}
-.card h2{margin:0 0 8px;font-size:16px;color:var(--cyan)}
-.card p{margin:8px 0;color:var(--muted)}
-.card ul{margin:8px 0;padding-left:18px;color:var(--muted)}
-.tag{display:inline-block;margin-top:10px;background:#081521;border:1px solid var(--line);
-  color:var(--amber);border-radius:999px;padding:6px 12px;font-size:12px}
-.dot{width:10px;height:10px;border-radius:50%;background:#25c85b;box-shadow:0 0 14px rgba(37,200,91,.7);display:inline-block;margin-right:6px}
+  border-radius:14px;padding:13px 16px;box-shadow:var(--shadow)}
+.logo{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:#0a1b2a;
+  display:grid;place-items:center;font-size:24px;color:var(--cyan)}
+.brand h1{font-size:21px;line-height:1;margin:0}
+.brand p{margin:5px 0 0;color:var(--blue);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.panel{margin-top:13px;background:linear-gradient(180deg,rgba(14,27,41,.96),rgba(9,20,31,.96));
+  border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);overflow:hidden}
+.ph{padding:11px 14px;border-bottom:1px solid var(--line);font-weight:700;font-size:13px;letter-spacing:.03em;color:#cfe2ef}
+.pb{padding:13px 14px}
+label{display:block;color:#b8cad6;font-size:12px;margin-bottom:5px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.fld{flex:1;min-width:120px;margin-bottom:11px}
+input[type=number],select{width:100%;background:#07131e;border:1px solid var(--line);border-radius:8px;
+  color:#e9f6ff;padding:10px;font-size:15px;font-family:ui-monospace,Menlo,monospace}
+select{font-family:inherit}
+.seg{display:flex;gap:8px;margin-top:4px}
+.seg button{flex:1;background:#081521;border:1px solid var(--line);color:#9fb5c4;border-radius:9px;
+  padding:11px 8px;font-size:13px;cursor:pointer;line-height:1.25}
+.seg button b{display:block;color:#cfe2ef;font-size:13px}
+.seg button small{color:#7e96a7;font-size:10.5px}
+.seg button.on{border-color:var(--blue);background:#0b2940;box-shadow:inset 0 0 0 1px rgba(39,168,255,.2)}
+.seg button.on b{color:var(--cyan)}
+/* live */
+.live-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:2px 2px 10px}
+.pv .n{font-size:38px;color:var(--amber);line-height:1}.pv .u{font-size:11px;color:#7d95a6;margin-left:4px;text-transform:uppercase}
+.pv small{display:block;color:#7d95a6;font-size:10px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.vz{text-align:right}.vz .n{font-size:30px;color:var(--green);line-height:1}.vz .u{font-size:11px;color:#7d95a6;margin-left:3px}
+.bar{height:6px;background:#06101a;border-radius:4px;overflow:hidden;margin:2px 0 12px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--green))}
+input[type=range]{width:100%;accent-color:var(--amber)}
+.hint{font-size:11px;color:#7892a3;margin-top:4px}
+.ma3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}
+.cell{background:#07131e;border:1px solid var(--line);border-radius:9px;padding:10px}
+.cell .k{font-size:9.5px;color:#7d95a6;text-transform:uppercase;letter-spacing:.07em}
+.cell .v{font-size:19px;margin-top:4px;color:var(--cyan)}.cell.on{border-color:var(--amber);box-shadow:inset 0 0 0 1px rgba(255,189,54,.25)}.cell.on .v{color:var(--amber)}
+/* diagrama */
+.diag{display:flex;align-items:center;gap:8px;margin-top:13px;font-size:11.5px;color:#9fb5c4}
+.box{flex:1;text-align:center;background:#081521;border:1px solid var(--line);border-radius:9px;padding:9px 6px}
+.box b{display:block;color:#cfe2ef;font-size:12px}.box.sqrt{border-color:var(--amber);color:var(--amber)}.box.sqrt b{color:var(--amber)}
+.arrow{color:#5c7488}
+/* tabela */
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:8px 6px;text-align:right;border-bottom:1px solid rgba(35,56,75,.6)}
+th{color:#7d95a6;font-size:10px;text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+td:first-child,th:first-child{text-align:left}
+tr.key td{background:rgba(255,189,54,.08)}tr.key td:first-child{color:var(--amber);font-weight:700}
+.vzc{color:var(--green)}.dpc{color:var(--cyan)}
+.note{margin-top:11px;border-radius:10px;padding:11px 12px;font-size:12px;line-height:1.5}
+.note.ok{border:1px solid #245c42;background:#0a1c15;color:#9fe6bd}
+.note.warn{border:1px solid #6b5a2e;background:#1c160a;color:#ffd98a}
+.note b{color:#fff}
+.foot{color:#5c7488;font-size:11px;text-align:center;margin-top:18px;line-height:1.6}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="topbar">
-    <div class="logo">〜</div>
+    <div class="logo">√</div>
     <div class="brand">
       <h1>Vazão</h1>
-      <p>Ferramenta de campo</p>
+      <p>Placa de orifício · extração de raiz</p>
     </div>
   </div>
 
-  <div class="card">
-    <h2>Projeto novo — pronto pra construir 🛠️</h2>
-    <p>Esqueleto de PWA criado no mesmo padrão da <strong>Régua de Nível</strong>:
-       arquivo único, funciona <strong>offline</strong> e instala no iPhone pelo Safari
-       (Compartilhar → Adicionar à Tela de Início).</p>
-    <p>Falta você me dizer <strong>o que o app de vazão deve fazer</strong>. Por exemplo:</p>
-    <ul>
-      <li>Que tipo de medição de vazão? (placa de orifício / DP, Coriolis, turbina, ultrassônico…)</li>
-      <li>Que contas ele precisa fazer e com quais entradas?</li>
-      <li>Precisa de desenho/esquema na tela, como o de nível?</li>
-    </ul>
-    <span class="tag"><span class="dot"></span>Aguardando a descrição do app</span>
+  <!-- CONFIG -->
+  <div class="panel">
+    <div class="ph">Configuração</div>
+    <div class="pb">
+      <div class="row">
+        <div class="fld"><label>ΔP mínimo</label><input type="number" id="dpMin" value="0" inputmode="decimal"></div>
+        <div class="fld"><label>ΔP máximo (range)</label><input type="number" id="dpMax" value="1250" inputmode="decimal"></div>
+        <div class="fld"><label>Unidade do ΔP</label>
+          <select id="dpUnit">
+            <option>mmH₂O</option><option>kgf/cm²</option><option>bar</option><option>kPa</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="fld"><label>Vazão mínima</label><input type="number" id="qMin" value="0" inputmode="decimal"></div>
+        <div class="fld"><label>Vazão máxima (range)</label><input type="number" id="qMax" value="4800" inputmode="decimal"></div>
+        <div class="fld"><label>Unidade de vazão</label>
+          <select id="qUnit">
+            <option>t/h</option><option>kg/h</option><option>Nm³/h</option><option selected>m³/h</option>
+          </select>
+        </div>
+      </div>
+      <label>Onde é feita a extração de raiz?</label>
+      <div class="seg" id="mode">
+        <button data-m="painel" class="on"><b>Raiz no painel</b><small>transmissor manda ΔP linear</small></button>
+        <button data-m="tx"><b>Raiz no transmissor</b><small>já manda vazão</small></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE -->
+  <div class="panel">
+    <div class="ph">Simulação ao vivo — arraste o ΔP</div>
+    <div class="pb">
+      <div class="live-top">
+        <div class="pv"><small>ΔP (campo)</small><span class="n mono" id="lvDp">625</span><span class="u" id="lvDpU">mmH₂O</span><div class="hint"><span id="lvDpPct">50</span>% do range</div></div>
+        <div class="vz"><small>Vazão (painel)</small><span class="n mono" id="lvQ">3394</span><span class="u" id="lvQU">m³/h</span><div class="hint"><span id="lvQPct">70,7</span>%</div></div>
+      </div>
+      <div class="bar"><i id="lvBar" style="width:70.7%"></i></div>
+      <input type="range" id="slider" min="0" max="100" step="0.5" value="50">
+      <div class="ma3">
+        <div class="cell" id="cLin"><div class="k">mA se linear</div><div class="v mono" id="maLin">12,00</div></div>
+        <div class="cell" id="cRaiz"><div class="k">mA se raiz</div><div class="v mono" id="maRaiz">15,31</div></div>
+        <div class="cell"><div class="k">O painel mostra</div><div class="v mono vzc" id="lvPan">70,7%</div></div>
+      </div>
+      <div class="diag" id="diag"></div>
+    </div>
+  </div>
+
+  <!-- TABELA -->
+  <div class="panel">
+    <div class="ph">Tabela de referência</div>
+    <div class="pb" style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th>ΔP %</th><th>ΔP <span id="thDpU">mmH₂O</span></th>
+          <th>Vazão %</th><th>Vazão <span id="thQU">m³/h</span></th>
+          <th>mA linear</th><th>mA raiz</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="note ok" id="check"></div>
+  <div class="note warn"><b>⚠️ Raiz dupla:</b> a extração de raiz deve ser feita em <b>um lugar só</b> — ou no transmissor, ou no painel/DCS, <b>nunca nos dois</b>. Se os dois extraírem, a conta sai errada. Teste rápido: em modo raiz, <b>25% de ΔP tem que dar 50% (12&nbsp;mA)</b>; se der 25%, a raiz está faltando.</div>
+
+  <div class="foot">
+    Vazão ∝ √ΔP · Vazão% = 10·√(ΔP%) · 4–20&nbsp;mA<br>
+    Ferramenta de campo · funciona offline · v1
   </div>
 </div>
 
 <script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", function(){
-    navigator.serviceWorker.register("./sw.js").catch(function(){});
-  });
+var $=function(id){return document.getElementById(id)};
+var mode="painel";
+var PTS=[0,10,25,50,75,90,100];
+
+function num(id){var v=parseFloat($(id).value);return isNaN(v)?0:v;}
+function br(n,d){ // formata com vírgula
+  d=(d==null)?1:d;
+  return n.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
 }
+function vazaoPct(dpPct){ return dpPct<=0?0:10*Math.sqrt(dpPct); } // 0..100
+function maLinear(dpPct){ return 4+16*(dpPct/100); }
+function maRaiz(dpPct){ return 4+16*(vazaoPct(dpPct)/100); }
+
+function calc(){
+  var dpMin=num("dpMin"),dpMax=num("dpMax"),qMin=num("qMin"),qMax=num("qMax");
+  var dpU=$("dpUnit").value,qU=$("qUnit").value;
+  $("lvDpU").textContent=dpU;$("lvQU").textContent=qU;$("thDpU").textContent=dpU;$("thQU").textContent=qU;
+
+  // ----- live -----
+  var p=parseFloat($("slider").value); // dp %
+  var vp=vazaoPct(p);
+  var dpVal=dpMin+(dpMax-dpMin)*p/100;
+  var qVal=qMin+(qMax-qMin)*vp/100;
+  $("lvDp").textContent=br(dpVal, dpVal>=100?0:1);
+  $("lvDpPct").textContent=br(p,0);
+  $("lvQ").textContent=br(qVal, qVal>=100?0:1);
+  $("lvQPct").textContent=br(vp,1);
+  $("lvBar").style.width=vp+"%";
+  $("maLin").textContent=br(maLinear(p),2);
+  $("maRaiz").textContent=br(maRaiz(p),2);
+  $("lvPan").textContent=br(vp,1)+"%";
+  $("cLin").className="cell"+(mode==="painel"?" on":"");
+  $("cRaiz").className="cell"+(mode==="tx"?" on":"");
+
+  // diagrama
+  var d=$("diag");
+  if(mode==="painel"){
+    d.innerHTML='<div class="box"><b>Transmissor</b>ΔP linear</div><span class="arrow">→</span>'+
+      '<div class="box sqrt"><b>Painel / DCS</b>√ extrai aqui</div><span class="arrow">→</span>'+
+      '<div class="box"><b>Operador</b>vê vazão</div>';
+  }else{
+    d.innerHTML='<div class="box sqrt"><b>Transmissor</b>√ extrai aqui</div><span class="arrow">→</span>'+
+      '<div class="box"><b>Painel / DCS</b>só escala</div><span class="arrow">→</span>'+
+      '<div class="box"><b>Operador</b>vê vazão</div>';
+  }
+
+  // ----- tabela -----
+  var html="";
+  for(var i=0;i<PTS.length;i++){
+    var dp=PTS[i], v=vazaoPct(dp);
+    var dv=dpMin+(dpMax-dpMin)*dp/100;
+    var qv=qMin+(qMax-qMin)*v/100;
+    var key=(dp===25)?" class='key'":"";
+    html+="<tr"+key+"><td>"+dp+"%</td><td class='dpc'>"+br(dv,dv>=100?0:1)+"</td>"+
+      "<td>"+br(v,1)+"%</td><td class='vzc'>"+br(qv,qv>=100?0:1)+"</td>"+
+      "<td class='mono'>"+br(maLinear(dp),2)+"</td><td class='mono'>"+br(maRaiz(dp),2)+"</td></tr>";
+  }
+  $("tbody").innerHTML=html;
+
+  // check 25%
+  var modoTxt=(mode==="painel")?"o painel faz a raiz (transmissor sai linear)":"o transmissor faz a raiz";
+  $("check").innerHTML="<b>✅ Conferência dos 25%:</b> com "+modoTxt+", ao injetar <b>25% de ΔP</b> "+
+    "("+br(dpMin+(dpMax-dpMin)*0.25,0)+" "+$("dpUnit").value+") o transmissor deve indicar "+
+    "<b>"+(mode==="painel"?br(maLinear(25),2)+" mA":br(maRaiz(25),2)+" mA")+"</b> e o painel <b>50% da vazão</b>.";
+}
+
+// eventos
+["dpMin","dpMax","qMin","qMax","dpUnit","qUnit","slider"].forEach(function(id){
+  $(id).addEventListener("input",calc);
+});
+$("mode").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  mode=b.getAttribute("data-m");
+  [].forEach.call(this.children,function(x){x.classList.remove("on")});
+  b.classList.add("on");calc();
+});
+calc();
+
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").catch(function(){})})}
 </script>
 </body>
 </html>
