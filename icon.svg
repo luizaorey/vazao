@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0c3b46"/>
+      <stop offset="0.55" stop-color="#0a2430"/>
+      <stop offset="1" stop-color="#05141c"/>
+    </linearGradient>
+    <linearGradient id="flow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#43c9ff"/>
+      <stop offset="1" stop-color="#6fe04a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- fundo full-bleed -->
+  <rect x="0" y="0" width="512" height="512" fill="url(#bg)"/>
+
+  <!-- fluxo passando pela placa (converge no furo = vena contracta) -->
+  <g fill="none" stroke="url(#flow)" stroke-width="22" stroke-linecap="round">
+    <path d="M70,188 Q180,188 256,238 Q330,238 410,208"/>
+    <path d="M70,256 L410,256"/>
+    <path d="M70,324 Q180,324 256,274 Q330,274 410,304"/>
+  </g>
+  <!-- pontas de seta -->
+  <g fill="#6fe04a">
+    <path d="M402,188 L446,208 L402,228 Z"/>
+    <path d="M404,236 L448,256 L404,276 Z"/>
+    <path d="M402,284 L446,304 L402,324 Z"/>
+  </g>
+
+  <!-- placa de orifício: duas barras com furo no meio -->
+  <g fill="#d9e4ea" stroke="#9fb3bd" stroke-width="3">
+    <rect x="240" y="58"  width="30" height="160" rx="9"/>
+    <rect x="240" y="294" width="30" height="160" rx="9"/>
+  </g>
+
+  <!-- símbolo da raiz (identidade do cálculo) -->
+  <path d="M322,430 l20,0 l16,34 l26,-96 l56,0" fill="none" stroke="#ffbd36" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+</svg>
