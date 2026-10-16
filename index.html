@@ -53,6 +53,9 @@ select{font-family:inherit}
 .vz{text-align:right}.vz .n{font-size:30px;color:var(--green);line-height:1}.vz .u{font-size:11px;color:#7d95a6;margin-left:3px}
 .bar{height:6px;background:#06101a;border-radius:4px;overflow:hidden;margin:2px 0 12px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--green))}
 input[type=range]{width:100%;accent-color:var(--amber)}
+.presets{display:flex;gap:7px;margin:11px 0 2px}
+.presets button{flex:1;background:#081521;border:1px solid var(--line);color:#9fb5c4;border-radius:8px;padding:10px 4px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace}
+.presets button.on{border-color:var(--amber);color:var(--amber);background:#1c160a}
 .hint{font-size:11px;color:#7892a3;margin-top:4px}
 .ma3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}
 .cell{background:#07131e;border:1px solid var(--line);border-radius:9px;padding:10px}
@@ -150,6 +153,13 @@ tr.key td{background:rgba(255,189,54,.08)}tr.key td:first-child{color:var(--ambe
       </div>
       <div class="bar"><i id="lvBar" style="width:70.7%"></i></div>
       <input type="range" id="slider" min="0" max="100" step="0.5" value="50">
+      <div class="presets" id="presets">
+        <button data-p="0">0%</button>
+        <button data-p="25">25%</button>
+        <button data-p="50">50%</button>
+        <button data-p="75">75%</button>
+        <button data-p="100">100%</button>
+      </div>
       <div class="ma3">
         <div class="cell" id="cLin"><div class="k">mA se linear</div><div class="v mono" id="maLin">12,00</div></div>
         <div class="cell" id="cRaiz"><div class="k">mA se raiz</div><div class="v mono" id="maRaiz">15,31</div></div>
@@ -219,6 +229,7 @@ function calc(){
   $("lvPan").innerHTML=br(vp,1)+"%"+(cut?" <span class='badge'>CORTE</span>":"");
   $("cLin").className="cell"+(mode==="painel"?" on":"");
   $("cRaiz").className="cell"+(mode==="tx"?" on":"");
+  [].forEach.call($("presets").children,function(x){x.classList.toggle("on",parseFloat(x.getAttribute("data-p"))===p)});
 
   // diagrama
   var d=$("diag");
@@ -288,6 +299,10 @@ $("mode").addEventListener("click",function(e){
   mode=b.getAttribute("data-m");
   [].forEach.call(this.children,function(x){x.classList.remove("on")});
   b.classList.add("on");calc();
+});
+$("presets").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  $("slider").value=b.getAttribute("data-p");calc();
 });
 $("tagSave").addEventListener("click",saveTag);
 $("tagName").addEventListener("keydown",function(e){if(e.key==="Enter")saveTag();});
